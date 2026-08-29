@@ -1,0 +1,7 @@
+logs/
+config/db.php
+.env
+.env.*
+!.env.example
+*.log
+sol.deb
