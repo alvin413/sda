@@ -397,8 +397,8 @@ $id = $_GET['id'];
                         </div>
                         <div class="col-md-12 mb-3">
                             <div class="info-label">Contraseña ILO</div>
-                            <div class="password-container" id="ilo_password">
-                                <input type="password" class="form-control info-value password-input" id="iloPassword" value="No configurada" readonly>
+                            <div class="password-container" id="ilo_password_container">
+                                <input type="password" class="form-control info-value password-input" id="ilo_password" value="No configurada" readonly>
                                 <span class="password-toggle" id="togglePassword" style="display:none;">
                                     <i class="fas fa-eye"></i>
                                 </span>
@@ -593,8 +593,8 @@ $(document).ready(function() {
             $('#modalActivarNoSerie').text(data.no_serie);
 
             // Contraseña ILO
-            if(data.iloPasswordDecrypted){
-                $('#iloPassword').data('password', data.iloPasswordDecrypted).val('••••••••');
+            if(data.ilo_password){
+                $('#ilo_password').data('password', data.ilo_password).val('••••••••');
                 $('#togglePassword').show();
             }
         } else {
@@ -604,7 +604,7 @@ $(document).ready(function() {
 
     // Función para mostrar/ocultar contraseña
     $('#togglePassword').click(function() {
-        const passwordField = $('#iloPassword');
+        const passwordField = $('#ilo_password');
         const icon = $(this).find('i');
         const realPassword = passwordField.data('password');
         
