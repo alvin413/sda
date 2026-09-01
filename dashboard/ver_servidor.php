@@ -398,17 +398,10 @@ $id = $_GET['id'];
                         <div class="col-md-12 mb-3">
                             <div class="info-label">Contraseña ILO</div>
                             <div class="password-container" id="ilo_password">
-                                <input type="password" 
-                                       class="form-control info-value password-input" 
-                                       id="iloPassword" 
-                                       value="<?= !empty($iloPasswordDecrypted) ? '••••••••' : 'No configurada' ?>" 
-                                       data-password="<?= htmlspecialchars($iloPasswordDecrypted) ?>" 
-                                       readonly>
-                                <?php if (!empty($iloPasswordDecrypted)): ?>
-                                <span class="password-toggle" id="togglePassword">
+                                <input type="password" class="form-control info-value password-input" id="iloPassword" value="No configurada" readonly>
+                                <span class="password-toggle" id="togglePassword" style="display:none;">
                                     <i class="fas fa-eye"></i>
                                 </span>
-                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
