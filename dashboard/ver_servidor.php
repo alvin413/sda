@@ -568,16 +568,23 @@ $(document).ready(function() {
             $('#unidad_rack').text(data.unidad_rack || 'N/A');
             $('#ip_ilo').text(data.ip_ilo || 'N/A');
             $('#ilo_user').text(data.ilo_user || 'N/A');
+            // Estado de la contraseña ILO
+            if (data.ilo_password_configured) {
+                $('#ilo_password')
+                    .attr('type', 'password')
+                    .val('••••••••');
+
+                $('#togglePassword').show();
+            } else {
+                $('#ilo_password')
+                    .attr('type', 'password')
+                    .val('No configurada');
+
+                $('#togglePassword').hide();
+            }
             $('#ci').text(data.ci || 'N/A');
             $('#fecha_garantia').text(data.fecha_garantia || 'N/A');
             $('#created_at').text(data.created_at || 'N/A');
-
-            // Estado con color e ícono
-            $('#estado').html(`
-                <i class="fas fa-circle me-2 ${getEstadoClass(data.estado)}"></i>
-                <span>${formatEstado(data.estado)}</span>
-            `);
-
             $('#btnEditarServidor').attr('href', `/alarmas/dashboard/editar_servidor.php?id=${data.id}`);
 
             if (data.estado === 'activo') {
@@ -592,11 +599,6 @@ $(document).ready(function() {
             $('#modalActivarHostname').text(data.hostname);
             $('#modalActivarNoSerie').text(data.no_serie);
 
-            // Contraseña ILO
-            if(data.ilo_password){
-                $('#ilo_password').data('password', data.ilo_password).val('••••••••');
-                $('#togglePassword').show();
-            }
         } else {
             alert('Error al obtener datos del servidor: ' + (response.error || 'Desconocido'));
         }
@@ -604,25 +606,95 @@ $(document).ready(function() {
 
     // Función para mostrar/ocultar contraseña
     $('#togglePassword').click(function() {
+
         const passwordField = $('#ilo_password');
         const icon = $(this).find('i');
-        const realPassword = passwordField.data('password');
-        
-        if (passwordField.attr('type') === 'password') {
-            if (confirm('ADVERTENCIA: Estás a punto de ver información sensible. ¿Continuar?')) {
-                passwordField.attr('type', 'text').val(realPassword);
-                icon.removeClass('fa-eye').addClass('fa-eye-slash');
-                setTimeout(() => {
-                    if (passwordField.attr('type') === 'text') {
-                        passwordField.attr('type', 'password').val('••••••••');
-                        icon.removeClass('fa-eye-slash').addClass('fa-eye');
-                    }
-                }, 30000);
-            }
-        } else {
-            passwordField.attr('type', 'password').val('••••••••');
-            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+
+        // Si ya estamos mostrando la contraseña, ocultarla
+        if (passwordField.attr('type') === 'text') {
+
+            passwordField
+                .attr('type', 'password')
+                .val('••••••••');
+
+            icon
+                .removeClass('fa-eye-slash')
+                .addClass('fa-eye');
+
+            return;
         }
+
+        // Confirmación antes de revelar información sensible
+        if (!confirm(
+            'ADVERTENCIA: Estás a punto de ver información sensible.\n\n¿Continuar?'
+        )) {
+            return;
+        }
+
+        // Obtener contraseña desde endpoint protegido
+        $.getJSON('../api/get_ilo_password.php', {
+            id: servidorId
+        })
+        .done(function(response) {
+
+            if (!response.success) {
+                alert(
+                    'No fue posible obtener la contraseña: ' +
+                    (response.error || 'Error desconocido')
+                );
+                return;
+            }
+
+            const password = response.data?.password || '';
+
+            if (!password) {
+                passwordField
+                    .attr('type', 'password')
+                    .val('No configurada');
+
+                $('#togglePassword').hide();
+
+                return;
+            }
+
+            // Mostrar contraseña
+            passwordField
+                .attr('type', 'text')
+                .val(password);
+
+            icon
+                .removeClass('fa-eye')
+                .addClass('fa-eye-slash');
+
+            // Ocultar automáticamente después de 30 segundos
+            setTimeout(function() {
+
+                if (passwordField.attr('type') === 'text') {
+
+                    passwordField
+                        .attr('type', 'password')
+                        .val('••••••••');
+
+                    icon
+                        .removeClass('fa-eye-slash')
+                        .addClass('fa-eye');
+                }
+
+            }, 30000);
+
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+
+            console.error('ERROR API PASSWORD');
+            console.error('Status:', xhr.status);
+            console.error('TextStatus:', textStatus);
+            console.error('Error:', errorThrown);
+            console.error('Response:', xhr.responseText);
+
+            alert(
+                'No fue posible obtener la contraseña.'
+            );
+        });
     });
 
     // Dar de baja servidor
