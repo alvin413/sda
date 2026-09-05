@@ -61,8 +61,9 @@ try {
         jsonResponse(false, '', 'Servidor no encontrado');
     }
 
-    // Desencriptar contraseña ILO si existe
-    $servidor['iloPasswordDecrypted'] = !empty($servidor['ilo_password']) ? decryptPassword($servidor['ilo_password']) : '';
+    $servidor['ilo_password_configured'] = !empty($servidor['ilo_password']);
+
+    unset($servidor['ilo_password']);
 
     // Formatear fechas
     $servidor['created_at'] = !empty($servidor['created_at']) ? (new DateTime($servidor['created_at']))->format('d/m/Y H:i') : '';
